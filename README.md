@@ -1,66 +1,42 @@
-# Santander Dev Week 2023 Java API
+# 🎬 Sistema de recomendação de filmes
 
-RESTful API da Santander Dev Week 2023 construída em Java 17 com Spring Boot 3.
+Este é um projeto de sistema de recomendação de filmes desenvolvido em Java 17 com Spring Boot 3. A API RESTful permite recomendações personalizadas com base nas preferências do usuário e avaliações de filmes.
 
-## Principais Tecnologias
- - **Java 17**: Utilizaremos a versão LTS mais recente do Java para tirar vantagem das últimas inovações que essa linguagem robusta e amplamente utilizada oferece;
- - **Spring Boot 3**: Trabalharemos com a mais nova versão do Spring Boot, que maximiza a produtividade do desenvolvedor por meio de sua poderosa premissa de autoconfiguração;
- - **Spring Data JPA**: Exploraremos como essa ferramenta pode simplificar nossa camada de acesso aos dados, facilitando a integração com bancos de dados SQL;
- - **OpenAPI (Swagger)**: Vamos criar uma documentação de API eficaz e fácil de entender usando a OpenAPI (Swagger), perfeitamente alinhada com a alta produtividade que o Spring Boot oferece;
- - **Railway**: facilita o deploy e monitoramento de nossas soluções na nuvem, além de oferecer diversos bancos de dados como serviço e pipelines de CI/CD.
+## 🚀 Principais Tecnologias
+- **Java 17**: Utilizamos a versão LTS mais recente do Java para aproveitar as inovações mais recentes em uma linguagem robusta e amplamente adotada.
+- **Spring Boot 3**: Trabalhamos com a mais nova versão do Spring Boot, maximizando a produtividade do desenvolvedor com suas avançadas funcionalidades de autoconfiguração.
+- **Spring Data JPA**: Simplificamos o acesso aos dados e facilitamos a integração com bancos de dados SQL.
+- **OpenAPI (Swagger)**: Criamos uma documentação de API clara e eficaz usando OpenAPI (Swagger), garantindo uma interface amigável e produtiva.
+- **Railway**: Facilitamos o deploy e monitoramento das soluções na nuvem, além de oferecer diversos bancos de dados como serviço e pipelines de CI/CD.
 
-## [Link do Figma](https://www.figma.com/file/0ZsjwjsYlYd3timxqMWlbj/SANTANDER---Projeto-Web%2FMobile?type=design&node-id=1421%3A432&mode=design&t=6dPQuerScEQH0zAn-1)
-
-O Figma foi utilizado para a abstração do domínio desta API, sendo útil na análise e projeto da solução.
-
-## Diagrama de Classes (Domínio da API)
+### 📊 Diagrama de Classes
 
 ```mermaid
 classDiagram
   class User {
+    -Long id
     -String name
-    -Account account
-    -Feature[] features
-    -Card card
-    -News[] news
+    -List<Movie> watchedMovies
+    -List<Movie> favoriteMovies
+    -List<String> preferredGenres
   }
 
-  class Account {
-    -String number
-    -String agency
-    -Number balance
-    -Number limit
+  class Movie {
+    -Long id
+    -String title
+    -String genre
+    -String director
+    -List<Rating> ratings
   }
 
-  class Feature {
-    -String icon
-    -String description
+  class Rating {
+    -Long id
+    -User user
+    -Movie movie
+    -int ratingValue
   }
 
-  class Card {
-    -String number
-    -Number limit
-  }
-
-  class News {
-    -String icon
-    -String description
-  }
-
-  User "1" *-- "1" Account
-  User "1" *-- "N" Feature
-  User "1" *-- "1" Card
-  User "1" *-- "N" News
+  User "1" *-- "N" Movie : watchedMovies
+  User "1" *-- "N" Movie : favoriteMovies
+  Movie "1" *-- "N" Rating
 ```
-
-## Documentação da API (Swagger)
-
-### [https://sdw-2023-prd.up.railway.app/swagger-ui.html](https://sdw-2023-prd.up.railway.app/swagger-ui.html)
-
-Esta API ficará disponível no Railway por um período de tempo limitado, mas este é um código-fonte aberto. Portanto, sintam-se à vontade para cloná-lo, modificá-lo (já que é um bom projeto base para novos projetos) e executar localmente ou onde achar mais interessante! Só não esquece de marcar a gente quando divulgar a sua solução 🥰
-
-### IMPORTANTE
-
-Aos interessados no desenvolvimento da tela inicial do App do Santander (Figma) em Angular, Android, iOS ou Flutter... Caso a URL produtiva não esteja mais disponível, deixamos um Backup no GitHub Pages, é só dar um GET lá 😘
-- URL de Produção: https://sdw-2023-prd.up.railway.app/users/1
-- Mock (Backup): https://digitalinnovationone.github.io/santander-dev-week-2023-api/mocks/find_one.json
