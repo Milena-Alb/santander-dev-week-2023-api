@@ -1,36 +1,27 @@
 package me.dio.domain.model;
 
+import jakarta.persistence.*;
+import me.dio.domain.model.movie.Movie;
+
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-
 @Entity(name = "tb_user")
-public class User {
-    
+public class User extends Movie {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private Account account;
-    
-    @OneToOne(cascade = CascadeType.ALL)
-    private Card card;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Movie> watchedMovies;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Feature> features;
+    private List<Movie> favoriteMovies;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<News> news;
+    @ElementCollection
+    private List<String> preferredGenres;
 
     public Long getId() {
         return id;
@@ -48,36 +39,27 @@ public class User {
         this.name = name;
     }
 
-    public Account getAccount() {
-        return account;
+    public List<Movie> getWatchedMovies() {
+        return watchedMovies;
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setWatchedMovies(List<Movie> watchedMovies) {
+        this.watchedMovies = watchedMovies;
     }
 
-    public Card getCard() {
-        return card;
+    public List<Movie> getFavoriteMovies() {
+        return favoriteMovies;
     }
 
-    public void setCard(Card card) {
-        this.card = card;
+    public void setFavoriteMovies(List<Movie> favoriteMovies) {
+        this.favoriteMovies = favoriteMovies;
     }
 
-    public List<Feature> getFeatures() {
-        return features;
+    public List<String> getPreferredGenres() {
+        return preferredGenres;
     }
 
-    public void setFeatures(List<Feature> features) {
-        this.features = features;
+    public void setPreferredGenres(List<String> preferredGenres) {
+        this.preferredGenres = preferredGenres;
     }
-
-    public List<News> getNews() {
-        return news;
-    }
-
-    public void setNews(List<News> news) {
-        this.news = news;
-    }
-
 }

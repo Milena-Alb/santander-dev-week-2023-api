@@ -1,7 +1,11 @@
 package me.dio.service.impl;
 
 import me.dio.domain.model.User;
+import me.dio.domain.model.movie.Movie;
+import me.dio.domain.model.movie.Rating;
 import me.dio.domain.repository.UserRepository;
+import me.dio.domain.repository.movie.MovieRepository;
+import me.dio.domain.repository.movie.RatingRepository;
 import me.dio.service.UserService;
 import me.dio.service.exception.BusinessException;
 import me.dio.service.exception.NotFoundException;
@@ -22,9 +26,13 @@ public class UserServiceImpl implements UserService {
     private static final Long UNCHANGEABLE_USER_ID = 1L;
 
     private final UserRepository userRepository;
+    private final MovieRepository movieRepository;
+    private final RatingRepository ratingRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, MovieRepository movieRepository, RatingRepository ratingRepository) {
         this.userRepository = userRepository;
+        this.movieRepository = movieRepository;
+        this.ratingRepository = ratingRepository;
     }
 
     @Transactional(readOnly = true)
@@ -34,21 +42,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     public User findById(Long id) {
-        return this.userRepository.findById(id).orElseThrow(NotFoundException::new);
+        return this.userRepository.findById(id).orElseThrow(() -> new NotFoundException("Movie not found"));
     }
 
     @Transactional
     public User create(User userToCreate) {
         ofNullable(userToCreate).orElseThrow(() -> new BusinessException("User to create must not be null."));
-        ofNullable(userToCreate.getAccount()).orElseThrow(() -> new BusinessException("User account must not be null."));
-        ofNullable(userToCreate.getCard()).orElseThrow(() -> new BusinessException("User card must not be null."));
 
         this.validateChangeableId(userToCreate.getId(), "created");
-        if (userRepository.existsByAccountNumber(userToCreate.getAccount().getNumber())) {
-            throw new BusinessException("This account number already exists.");
-        }
-        if (userRepository.existsByCardNumber(userToCreate.getCard().getNumber())) {
-            throw new BusinessException("This card number already exists.");
+        if (userRepository.existsById(userToCreate.getId())) {
+            throw new BusinessException("This user already exists.");
         }
         return this.userRepository.save(userToCreate);
     }
@@ -62,10 +65,9 @@ public class UserServiceImpl implements UserService {
         }
 
         dbUser.setName(userToUpdate.getName());
-        dbUser.setAccount(userToUpdate.getAccount());
-        dbUser.setCard(userToUpdate.getCard());
-        dbUser.setFeatures(userToUpdate.getFeatures());
-        dbUser.setNews(userToUpdate.getNews());
+        dbUser.setWatchedMovies(userToUpdate.getWatchedMovies());
+        dbUser.setFavoriteMovies(userToUpdate.getFavoriteMovies());
+        dbUser.setPreferredGenres(userToUpdate.getPreferredGenres());
 
         return this.userRepository.save(dbUser);
     }
@@ -77,10 +79,25 @@ public class UserServiceImpl implements UserService {
         this.userRepository.delete(dbUser);
     }
 
+    @Transactional(readOnly = true)
+    public List<Movie> getRecommendedMovies(Long userId) {
+        User user = this.findById(userId);
+        // Implementar lógica de recomendação baseada nas preferências do usuário
+        return movieRepository.findByGenreIn(user.getPreferredGenres());
+    }
+
+    @Transactional
+    public void rateMovie(Long userId, Long movieId, int ratingValue) {
+        User user = this.findById(userId);
+        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new NotFoundException("Movie not found"));
+
+        Rating rating = new Rating(user, movie, ratingValue);
+        ratingRepository.save(rating);
+    }
+
     private void validateChangeableId(Long id, String operation) {
         if (UNCHANGEABLE_USER_ID.equals(id)) {
-            throw new BusinessException("User with ID %d can not be %s.".formatted(UNCHANGEABLE_USER_ID, operation));
+            throw new BusinessException("User with ID %d cannot be %s.".formatted(UNCHANGEABLE_USER_ID, operation));
         }
     }
 }
-
